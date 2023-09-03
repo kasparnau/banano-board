@@ -2,7 +2,7 @@ import { LockClosedIcon } from "@heroicons/react/24/outline";
 
 const NewCard = () => {
   return (
-    <div className="h-40 w-56 border rounded flex justify-center items-center text-zinc-800">
+    <div className="h-40 w-40 border rounded flex justify-center items-center text-zinc-800">
       <LockClosedIcon className="w-16" />
     </div>
   );
@@ -10,7 +10,7 @@ const NewCard = () => {
 
 export default () => {
   return (
-    <div className="flex gap-6">
+    <div className="">
       <NewCard />
     </div>
   );

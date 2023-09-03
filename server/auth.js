@@ -1,6 +1,5 @@
-import { getPool, getUser } from "./api.js";
-
 import bcrypt from "bcrypt";
+import { getPool } from "./api.js";
 import passport from "passport";
 import passportLocal from "passport-local";
 
@@ -54,6 +53,40 @@ passport.use(
     }
   )
 );
+
+const getUserRoles = async (id) => {
+  const client = await getPool();
+  try {
+    const res = await client.query(
+      "SELECT * FROM user_roles WHERE user_id = $1",
+      [id]
+    );
+    const arr = res.rows.map((x) => x.role);
+    return arr;
+  } catch (e) {
+    return [];
+  } finally {
+    client.release();
+  }
+};
+
+const getUser = async (id) => {
+  const client = await getPool();
+
+  try {
+    const res = await client.query("SELECT * FROM users WHERE id = $1", [id]);
+    if (res.rows[0]) {
+      res.rows[0].roles = await getUserRoles(id);
+      return res.rows[0];
+    } else {
+      throw new Error("Couldn't find account");
+    }
+  } catch (e) {
+    return undefined;
+  } finally {
+    client.release();
+  }
+};
 
 passport.serializeUser((user, done) => {
   done(null, user.id);

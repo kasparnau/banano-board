@@ -13,6 +13,7 @@ import User from "api/User";
 import formatBan from "utils/formatter";
 import { useMainStore } from "stores";
 
+// This is not fetched from the server, and thus must be kept in sync manually by editing routes/tasks.js
 const SUBMIT_FEE = 19;
 const TAX_PERCENTAGE = 1;
 
@@ -28,7 +29,7 @@ export default () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full">
       <h1 className="font-bold text-2xl">Create Task</h1>
       <p className="text-zinc-400">
         Tasks let you request something to be done in exchange for bananos.
@@ -53,10 +54,10 @@ export default () => {
               errors.description = "This field is required.";
             } else if (
               values.description.length < 20 ||
-              values.description.length > 500
+              values.description.length > 2000
             ) {
               errors.description =
-                "Description must be between 20 and 500 characters long.";
+                "Description must be between 20 and 2000 characters long.";
             }
 
             if (!values.amount) {
@@ -178,7 +179,7 @@ export default () => {
                     <div className="flex gap-2 mt-8">
                       TOTAL:{" "}
                       {formatBan(
-                        parseFloat(values.amount) + parseFloat(SUBMIT_FEE)
+                        parseFloat(values.amount) + parseFloat(TOTAL_FEE)
                       )}
                     </div>
                     <p className="text-xs text-zinc-400">

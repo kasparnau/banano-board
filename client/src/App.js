@@ -14,6 +14,7 @@ import MainPage from "pages/Main/index.jsx";
 import PrivacyPage from "pages/Privacy";
 import React from "react";
 import RegisterPage from "pages/Register";
+import TaskPage from "pages/Task";
 import TermsPage from "pages/Terms";
 import User from "./api/User.js";
 import { useMainStore } from "stores";
@@ -25,24 +26,28 @@ function App() {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-y-auto bg-black text-white items-center">
+    <div className="h-screen w-screen bg-black text-white overflow-x-hidden overflow-y-auto">
       {/* user is only undefined while loading, this is to avoid UI flashing */}
       {user !== undefined && (
-        <React.Fragment>
+        <div>
           <Header />
-          <div className="h-full w-full max-w-6xl p-6 ">
-            <Routes>
-              <Route path="login" element={<LoginPage />} />
-              <Route path="register" element={<RegisterPage />} />
-              <Route path="terms" element={<TermsPage />} />
-              <Route path="privacy" element={<PrivacyPage />} />
-              <Route path="account" element={<AccountPage />} />
-              <Route path="new-task" element={<CreateTask />} />
+          <div className="h-full w-full p-6 flex justify-center bg-black">
+            <div className="max-w-6xl w-full h-full flex">
+              <Routes>
+                <Route path="login" element={<LoginPage />} />
+                <Route path="register" element={<RegisterPage />} />
+                <Route path="terms" element={<TermsPage />} />
+                <Route path="privacy" element={<PrivacyPage />} />
+                <Route path="account" element={<AccountPage />} />
 
-              <Route path="*" element={<MainPage />} />
-            </Routes>
+                <Route path="new-task" element={<CreateTask />} />
+                <Route path="tasks/:taskId" element={<TaskPage />} />
+
+                <Route path="*" element={<MainPage />} />
+              </Routes>
+            </div>
           </div>
-        </React.Fragment>
+        </div>
       )}
     </div>
   );

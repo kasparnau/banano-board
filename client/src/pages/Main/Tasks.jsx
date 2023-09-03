@@ -7,7 +7,7 @@ const NewCard = () => {
   return (
     <a
       href="/new-task"
-      className="h-40 w-40 border rounded flex justify-center items-center"
+      className="h-40 w-40 border rounded flex justify-center items-center text-amber-600 hover:text-amber-400 transition-colors"
     >
       <PlusIcon className="w-16" />
     </a>
@@ -33,18 +33,19 @@ export default () => {
         return (
           <a
             href={`/tasks/${task.uuid}`}
-            className="h-40 w-96 border rounded flex flex-col justify-between p-4"
+            className="h-40 md:w-1/4 w-full border rounded flex flex-col justify-between p-4 group"
+            key={task.uuid}
           >
-            <div>{task.title}</div>
+            <div className="group-hover:text-amber-400">{task.title}</div>
             <div className="justify-between flex w-full">
               <div className="flex flex-col">
-                <p className="text-sm text-zinc-200">REQUESTER</p>
+                <p className="text-sm text-zinc-300 ">REQUESTER</p>
                 <p>@{task.username}</p>
               </div>
               <div className="flex flex-col">
-                <p className="text-sm text-zinc-200">BOUNTY</p>
+                <p className="text-sm text-zinc-300 ">BOUNTY</p>
 
-                <p>{formatBan(task.amount)}</p>
+                <div>{formatBan(task.amount)}</div>
               </div>
             </div>
           </a>
