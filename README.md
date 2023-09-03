@@ -1,6 +1,6 @@
 # BANANO BOARD
 
-Documentation is work in progress
+Documentation and a code cleanup is work in progress!
 
 # STACK
 
