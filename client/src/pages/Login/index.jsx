@@ -17,7 +17,7 @@ export default () => {
   }
 
   return (
-    <div className="h-full w-full flex justify-center items-center flex-col">
+    <div className="h-full w-full flex justify-center items-center flex-col lg:mt-40">
       <div className="flex flex-col w-full max-w-sm justify-center items-center">
         <h1 className="font-semibold text-2xl">Login to Banano Board</h1>
         <p className="text-zinc-400 text-sm mt-2 mb-8">
