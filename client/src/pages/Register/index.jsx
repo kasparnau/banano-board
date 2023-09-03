@@ -26,7 +26,12 @@ export default () => {
         <div className="w-full flex justify-center items-center">
           <div className="w-full flex flex-col justify-center items-center z-[1]">
             <Formik
-              initialValues={{ email: "", password: "", username: "" }}
+              initialValues={{
+                email: "",
+                password: "",
+                username: "",
+                address: "",
+              }}
               validate={(values) => {
                 const errors = {};
                 if (!values.email) {
@@ -35,6 +40,14 @@ export default () => {
                   !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
                 ) {
                   errors.email = "Invalid email address.";
+                }
+
+                if (!values.address) {
+                  errors.address = "This field is required.";
+                } else if (
+                  !/^ban_[13][0-13-9a-km-uw-z]{59}$/i.test(values.address)
+                ) {
+                  errors.address = "Invalid banano address.";
                 }
 
                 if (!values.username) {
@@ -78,7 +91,8 @@ export default () => {
                   await Auth.register(
                     values.email,
                     values.username,
-                    values.password
+                    values.password,
+                    values.address
                   );
                   window.location.reload();
                 } catch (e) {
@@ -147,6 +161,22 @@ export default () => {
                     />
                     {errors.password && touched.password && (
                       <DisplayError error={errors.password} />
+                    )}
+                  </div>
+
+                  <div>
+                    <Input
+                      value={values.address}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      title={"Your Banano Address"}
+                      autoComplete="on"
+                      placeholder="ban_"
+                      name="address"
+                      required
+                    />
+                    {errors.address && touched.address && (
+                      <DisplayError error={errors.address} />
                     )}
                   </div>
 

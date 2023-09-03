@@ -1,21 +1,31 @@
+import {
+  AdjustmentsHorizontalIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 import { format, parseISO } from "date-fns";
+import { useNavigate, useParams } from "react-router-dom";
 
+import ApplicationSentModal from "./ApplicationSentModal";
 import DisplayError from "components/DisplayError";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Formik } from "formik";
 import Input from "components/Input";
-import Modal from "./Modal";
 import React from "react";
 import Separator from "components/Separator";
 import SubmitButton from "components/SubmitButton";
+import TaskDeleteConfirmation from "./TaskDeleteModal";
 import Tasks from "api/Tasks";
 import formatBan from "utils/formatter";
 import { useMainStore } from "stores";
-import { useParams } from "react-router-dom";
 
 export default () => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const navigate = useNavigate();
+  const [applicationSentModalIsOpen, setApplicationSentModalIsOpen] =
+    React.useState(false);
   const [alreadySent, setAlreadySent] = React.useState(false);
+
+  const [taskDeleteConfirmationIsOpen, setTaskDeleteConfirmationIsOpen] =
+    React.useState(false);
+
   const [error, setError] = React.useState("");
 
   const { user } = useMainStore();
@@ -23,18 +33,22 @@ export default () => {
   let params = useParams();
 
   const refreshPage = async () => {
-    const taskId = params.taskId;
-    const result = await Tasks.get(taskId).then((res) => res.data);
+    try {
+      const taskId = params.taskId;
+      const result = await Tasks.get(taskId).then((res) => res.data);
 
-    const formattedTimeStamp = format(
-      parseISO(result.timestamp),
-      "dd-MM-yyyy HH:mm"
-    ).toUpperCase();
+      const formattedTimeStamp = format(
+        parseISO(result.timestamp),
+        "dd-MM-yyyy HH:mm"
+      ).toUpperCase();
 
-    setTask({
-      ...result,
-      timestamp: formattedTimeStamp,
-    });
+      setTask({
+        ...result,
+        timestamp: formattedTimeStamp,
+      });
+    } catch (e) {
+      navigate(`/`, { replace: true });
+    }
   };
 
   React.useEffect(() => {
@@ -43,11 +57,21 @@ export default () => {
 
   if (!task) return <div>Loading task</div>;
 
+  const deleteTask = async () => {
+    try {
+      if (!task) return;
+      await Tasks.delete(task.uuid);
+      navigate(`/my-tasks`, { replace: true });
+    } catch (e) {
+      navigate(`/my-tasks`, { replace: true });
+    }
+  };
+
   return (
     <div className="flex flex-col">
       {!task.verified && user.id === task.owner && (
         <div>
-          <h1 className="font-bold text-2xl text-red-400 flex gap-2">
+          <h1 className="font-bold text-2xl text-amber-400 flex gap-2">
             <ExclamationTriangleIcon className="w-8" />
             Only you can see this task.
           </h1>
@@ -62,6 +86,30 @@ export default () => {
             Bananos in escrow: {formatBan(task.balance)} | Required to verify
             task: {formatBan(task.amount + task.fee)}
           </p>
+          <Separator />
+        </div>
+      )}
+
+      {user.id === task.owner && (
+        <div className="flex flex-col gap-3">
+          <h1 className="font-bold text-2xl flex gap-2 mb-2">
+            <AdjustmentsHorizontalIcon className="w-8" />
+            Task Management
+          </h1>
+          <a
+            href={`/tasks/${task.uuid}/applications`}
+            className="border rounded py-2 px-4 text-center hover:text-amber-400 w-fit"
+          >
+            VIEW APPLICATIONS
+          </a>
+          <button
+            className="border rounded py-2 px-4 text-center hover:text-red-400 w-fit"
+            onClick={() => setTaskDeleteConfirmationIsOpen(true)}
+          >
+            DELETE TASK
+          </button>
+
+          <Separator />
         </div>
       )}
 
@@ -75,94 +123,108 @@ export default () => {
         <p className="mt-1 text-sm">{formatBan(task.amount)}</p>
         <h1 className="mt-8 font-bold text-lg">About this task</h1>
         <p className="mt-2 whitespace-pre-wrap">{task.description}</p>
-        <Separator />
-        <h1 className="mt-8 font-bold text-lg">Apply for this task</h1>
-        <Formik
-          initialValues={{ text: "", checkbox: false }}
-          validate={(values) => {
-            const errors = {};
-            if (!values.text) {
-              errors.text = "This field is required.";
-            }
+        {user && (
+          <React.Fragment>
+            <Separator />
+            <h1 className="mt-8 font-bold text-lg">Apply for this task</h1>
+            <Formik
+              initialValues={{ text: "", checkbox: false }}
+              validate={(values) => {
+                const errors = {};
+                if (!values.text) {
+                  errors.text = "This field is required.";
+                }
 
-            if (!values.checkbox) {
-              errors.checkbox = "This field is required.";
-            }
+                if (!values.checkbox) {
+                  errors.checkbox = "This field is required.";
+                }
 
-            return errors;
-          }}
-          onSubmit={async (values, { setSubmitting }) => {
-            try {
-              const result = await Tasks.apply(task.uuid, values.text);
-              if (result.data.alreadySent) setAlreadySent(true);
+                return errors;
+              }}
+              onSubmit={async (values, { setSubmitting }) => {
+                try {
+                  const result = await Tasks.apply(task.uuid, values.text);
+                  if (result.data.alreadySent) setAlreadySent(true);
 
-              setIsOpen(true);
-            } catch (e) {
-              setError(e.response?.data);
-            }
-            setSubmitting(false);
-          }}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            handleChange,
-            handleBlur,
-            handleSubmit,
-            isSubmitting,
-          }) => (
-            <form onSubmit={handleSubmit} className="w-full mt-4">
-              <div className="mb-4">
-                <p className="text-zinc-200 mb-2">Application</p>
-                <Input
-                  value={values.text}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  autoComplete="on"
-                  placeholder="I can do this gig!"
-                  name="text"
-                />
-                <p className="text-zinc-200 mt-2 text-xs">
-                  * Tell the poster why you are a good fit for this gig and
-                  would like to do it. <br />* Make sure to leave some kind of
-                  contact information (e.g. Discord or Reddit) so they can reach
-                  out. This website does not have a chat.
-                </p>
-                {errors.text && touched.text && (
-                  <DisplayError error={errors.text} />
-                )}
-                <div className="mt-6 flex gap-2 items-center">
-                  <input
-                    type="checkbox"
-                    id="checkbox"
-                    value={values.checkbox}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
+                  setApplicationSentModalIsOpen(true);
+                } catch (e) {
+                  setError(e.response?.data);
+                }
+                setSubmitting(false);
+              }}
+            >
+              {({
+                values,
+                errors,
+                touched,
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                isSubmitting,
+              }) => (
+                <form onSubmit={handleSubmit} className="w-full mt-4">
+                  <div className="mb-4">
+                    <p className="text-zinc-200 mb-2">Application</p>
+                    <Input
+                      value={values.text}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      autoComplete="on"
+                      placeholder="I can do this gig!"
+                      name="text"
+                    />
+                    <p className="text-zinc-200 mt-2 text-xs">
+                      * Tell the poster why you are a good fit for this gig and
+                      would like to do it. <br />* Make sure to leave some kind
+                      of contact information (e.g. Discord or Reddit) so they
+                      can reach out. This website does not have a chat.
+                    </p>
+                    {errors.text && touched.text && (
+                      <DisplayError error={errors.text} />
+                    )}
+                    <div className="mt-6 flex gap-2 items-center">
+                      <input
+                        type="checkbox"
+                        id="checkbox"
+                        value={values.checkbox}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                      />
+                      <p className="text-zinc-200 text-center">
+                        I made sure to leave contact information in my
+                        application.
+                      </p>
+                    </div>
+                    {errors.checkbox && touched.checkbox && (
+                      <DisplayError error={errors.checkbox} />
+                    )}
+                  </div>
+                  {error && (
+                    <div className="my-2">
+                      <DisplayError error={error} />
+                    </div>
+                  )}
+                  <SubmitButton
+                    fit
+                    disabled={isSubmitting || !values.text || !values.checkbox}
+                    text="Apply"
                   />
-                  <p className="text-zinc-200 text-center">
-                    I made sure to leave contact information in my application.
-                  </p>
-                </div>
-                {errors.checkbox && touched.checkbox && (
-                  <DisplayError error={errors.checkbox} />
-                )}
-              </div>
-              {error && (
-                <div className="my-2">
-                  <DisplayError error={error} />
-                </div>
+                </form>
               )}
-              <SubmitButton
-                fit
-                disabled={isSubmitting || !values.text || !values.checkbox}
-                text="Apply"
-              />
-            </form>
-          )}
-        </Formik>
+            </Formik>
+          </React.Fragment>
+        )}
       </div>
-      <Modal isOpen={isOpen} setIsOpen={setIsOpen} alreadySent={alreadySent} />
+      <ApplicationSentModal
+        isOpen={applicationSentModalIsOpen}
+        setIsOpen={setApplicationSentModalIsOpen}
+        alreadySent={alreadySent}
+      />
+      <TaskDeleteConfirmation
+        isOpen={taskDeleteConfirmationIsOpen}
+        setIsOpen={setTaskDeleteConfirmationIsOpen}
+        deleteTask={deleteTask}
+      />
     </div>
   );
 };

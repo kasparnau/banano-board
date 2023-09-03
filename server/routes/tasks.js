@@ -58,7 +58,7 @@ const fetchAll = async (req, res) => {
   try {
     const tasks = await client
       .query(
-        "SELECT T.uuid, T.title, T.amount, T.verified, U.username FROM tasks T INNER JOIN users U on (U.id = T.owner) ORDER BY T.id DESC"
+        "SELECT T.uuid, T.owner, T.title, T.amount, T.verified, U.username FROM tasks T INNER JOIN users U on (U.id = T.owner) ORDER BY T.id DESC"
       )
       .then((res) => res.rows);
 
@@ -79,7 +79,7 @@ const fetch = async (req, res) => {
 
     let task = await client
       .query(
-        "SELECT T.uuid, T.title, T.amount, T.verified, U.username, T.owner, T.description, T.banano_address, T.timestamp, T.fee FROM tasks T INNER JOIN users U on (U.id = T.owner) WHERE uuid = $1",
+        "SELECT T.uuid, T.id, T.title, T.amount, T.verified, U.username, T.owner, T.description, T.banano_address, T.timestamp, T.fee FROM tasks T INNER JOIN users U on (U.id = T.owner) WHERE uuid = $1",
         [taskId]
       )
       .then((res) => res.rows[0]);
@@ -112,6 +112,27 @@ const fetch = async (req, res) => {
 
     res.status(200).json(task);
   } catch (e) {
+    res.status(500).send("Failed to fetch");
+  } finally {
+    client.release();
+  }
+};
+
+const applications = async (req, res) => {
+  const client = await getPool();
+  try {
+    const taskId = req.query.taskId;
+
+    const applications = await client
+      .query(
+        "SELECT T.text, T.deleted, T.owner, U.username FROM task_applications T INNER JOIN users U ON (U.id = T.owner) WHERE T.task_id = $1 ORDER BY T.id DESC",
+        [taskId]
+      )
+      .then((res) => res.rows);
+
+    res.status(200).json(applications);
+  } catch (e) {
+    console.error(e);
     res.status(500).send("Failed to fetch");
   } finally {
     client.release();
@@ -151,9 +172,37 @@ const apply = async (req, res) => {
   }
 };
 
+const remove = async (req, res) => {
+  const client = await getPool();
+  try {
+    const uuid = req.body.uuid;
+
+    let task = await client
+      .query("SELECT * FROM tasks WHERE uuid = $1 AND owner = $2", [
+        uuid,
+        req.user.id,
+      ])
+      .then((res) => res.rows[0]);
+    if (!task) return res.status(400).send();
+
+    await client.query("DELETE FROM tasks WHERE uuid = $1 AND owner = $2", [
+      uuid,
+      req.user.id,
+    ]);
+
+    res.status(200).send();
+  } catch (e) {
+    res.status(500).send("Failed to send application");
+  } finally {
+    client.release();
+  }
+};
+
 export const taskRoutes = express.Router();
 
 taskRoutes.post("/submit", loggedIn, submit);
 taskRoutes.post("/apply", apply);
+taskRoutes.post("/delete", remove);
 taskRoutes.get("/fetchAll", fetchAll);
 taskRoutes.get("/get", fetch);
+taskRoutes.get("/applications", applications);

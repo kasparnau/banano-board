@@ -27,7 +27,7 @@ export default () => {
   }, []);
 
   return (
-    <div className="flex gap-6 flex-wrap">
+    <div className="flex gap-6 flex-wrap w-full">
       <NewCard />
       {tasks.map((task) => {
         return (
@@ -36,7 +36,9 @@ export default () => {
             className="h-40 md:w-1/4 w-full border rounded flex flex-col justify-between p-4 group"
             key={task.uuid}
           >
-            <div className="group-hover:text-amber-400">{task.title}</div>
+            <div className="group-hover:text-amber-400 break-all">
+              {task.title}
+            </div>
             <div className="justify-between flex w-full">
               <div className="flex flex-col">
                 <p className="text-sm text-zinc-300 ">REQUESTER</p>

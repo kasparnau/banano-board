@@ -11,7 +11,7 @@ export const authRoutes = express.Router();
 
 const badWordFilter = new BadWordsFilter();
 
-const isValidRegisterForm = (username, email, password) => {
+const isValidRegisterForm = (username, email, password, address) => {
   if (!email) {
     return false;
   } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
@@ -43,6 +43,12 @@ const isValidRegisterForm = (username, email, password) => {
     return false;
   }
 
+  if (!address) {
+    return false;
+  } else if (!/^ban_[13][0-13-9a-km-uw-z]{59}$/i.test(address)) {
+    return false;
+  }
+
   return true;
 };
 
@@ -67,11 +73,12 @@ const register = async function (req, res, next) {
 
   const username = req.body.username;
   const password = req.body.password;
+  const address = req.body.address;
   const email = req.body.email;
   const ip = geoip.pretty(req.ip);
 
   try {
-    if (!isValidRegisterForm(username, email, password)) {
+    if (!isValidRegisterForm(username, email, password, address)) {
       return res.status(400).send("Invalid form values?");
     }
 
@@ -103,8 +110,8 @@ const register = async function (req, res, next) {
 
     const newUser = await client
       .query(
-        "INSERT INTO users (email, username, password, registered_ip, registered_country) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [email, username, passwordHash, ip, geo?.country || "UNKNOWN"]
+        "INSERT INTO users (email, username, password, registered_ip, registered_country, banano_address) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [email, username, passwordHash, ip, geo?.country || "UNKNOWN", address]
       )
       .then((res) => res.rows[0]);
 

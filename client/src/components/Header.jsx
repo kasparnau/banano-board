@@ -1,9 +1,9 @@
+import { BriefcaseIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Link, Navigate, redirect } from "react-router-dom";
 import { Menu, Transition } from "@headlessui/react";
 
 import Auth from "api/Auth";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useMainStore } from "stores";
 
 const UserDropdown = ({ username }) => {
@@ -43,6 +43,20 @@ const UserDropdown = ({ username }) => {
                       aria-hidden="true"
                     />
                     Account
+                  </a>
+                )}
+              </Menu.Item>
+
+              <Menu.Item>
+                {({ active }) => (
+                  <a
+                    className={`${
+                      active ? "bg-amber-600 text-white" : "text-black"
+                    } group flex w-full items-center rounded-md px-2 py-2 text-sm gap-2`}
+                    href="/my-tasks"
+                  >
+                    <BriefcaseIcon className="h-5 w-5" aria-hidden="true" />
+                    My Tasks
                   </a>
                 )}
               </Menu.Item>

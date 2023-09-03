@@ -153,12 +153,16 @@ export default () => {
                     prefix={<Banano />}
                     required
                   />
+                  <p className="italic text-xs">
+                    * THIS WEBSITE IS CURRENTLY IN DEMO MODE, ENTER ANY AMOUNT
+                    FOR TESTING PURPOSES
+                  </p>
                   {errors.amount && touched.amount && (
                     <DisplayError error={errors.amount} />
                   )}
                 </div>
 
-                {values.amount && (
+                {values.amount && !isNaN(values.amount) && (
                   <div className="text-sm flex flex-col gap-1">
                     <Separator />
                     <p className="font-semibold text-xl">COST BREAKDOWN</p>
@@ -185,7 +189,7 @@ export default () => {
                     <p className="text-xs text-zinc-400">
                       * Amount of bananos you will pay. If you don't find the
                       right applicant or change your mind, you may cancel the
-                      task for a refund. Submit fee is non-refundable.
+                      task later for a refund. Submit fee is non-refundable.
                     </p>
                     <Separator />
                   </div>

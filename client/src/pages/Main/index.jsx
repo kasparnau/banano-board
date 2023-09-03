@@ -6,7 +6,7 @@ import { useState } from "react";
 
 export default () => {
   return (
-    <div className="flex flex-col gap-16">
+    <div className="flex flex-col gap-16 w-full">
       <div className="flex flex-col">
         <h1 className="font-bold text-2xl">Tasks</h1>
         <p className="text-zinc-400">

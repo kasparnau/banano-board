@@ -11,9 +11,11 @@ import CreateTask from "pages/CreateTask/index.jsx";
 import Header from "components/Header.jsx";
 import LoginPage from "pages/Login";
 import MainPage from "pages/Main/index.jsx";
+import MyTasks from "pages/MyTasks/index.jsx";
 import PrivacyPage from "pages/Privacy";
 import React from "react";
 import RegisterPage from "pages/Register";
+import TaskApplications from "pages/TaskApplications/index.jsx";
 import TaskPage from "pages/Task";
 import TermsPage from "pages/Terms";
 import User from "./api/User.js";
@@ -41,6 +43,12 @@ function App() {
                 <Route path="account" element={<AccountPage />} />
 
                 <Route path="new-task" element={<CreateTask />} />
+                <Route path="my-tasks" element={<MyTasks />} />
+
+                <Route
+                  path="tasks/:taskId/applications"
+                  element={<TaskApplications />}
+                />
                 <Route path="tasks/:taskId" element={<TaskPage />} />
 
                 <Route path="*" element={<MainPage />} />
