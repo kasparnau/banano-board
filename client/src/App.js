@@ -31,9 +31,9 @@ function App() {
     <div className="h-screen w-screen bg-black text-white overflow-x-hidden overflow-y-auto">
       {/* user is only undefined while loading, this is to avoid UI flashing */}
       {user !== undefined && (
-        <div>
+        <div className="h-full w-full">
           <Header />
-          <div className="h-full w-full p-6 flex justify-center bg-black">
+          <div className="w-full p-6 flex justify-center bg-black">
             <div className="max-w-6xl w-full h-full flex">
               <Routes>
                 <Route path="login" element={<LoginPage />} />

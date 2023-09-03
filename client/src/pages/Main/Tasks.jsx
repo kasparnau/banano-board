@@ -36,7 +36,7 @@ export default () => {
             className="h-40 md:w-1/4 w-full border rounded flex flex-col justify-between p-4 group"
             key={task.uuid}
           >
-            <div className="group-hover:text-amber-400 break-all">
+            <div className="group-hover:text-amber-400 overflow-hidden">
               {task.title}
             </div>
             <div className="justify-between flex w-full">
